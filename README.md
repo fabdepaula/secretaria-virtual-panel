@@ -64,11 +64,7 @@ Crie um `.env` na mesma pasta que o `docker-compose.yml` (pode copiar de `.env.e
 
 ### Com Docker Compose + Traefik
 
-O `docker-compose.yml` **não publica a porta 3000** no host: o tráfego entra pelo Traefik (HTTPS). A rede Docker **`traefik`** deve existir e ser a **mesma** à qual o container do Traefik está ligado.
-
-```bash
-docker network create traefik
-```
+O `docker-compose.yml` **não publica a porta 3000** no host: o tráfego entra pelo Traefik (HTTPS). O painel usa a rede Docker **`proxy-net`** (a **mesma** rede à qual o container do Traefik está ligado). Se a rede ainda não existir: `docker network create proxy-net`.
 
 No `.env`, defina `PANEL_HOST` (ex. `animallabor.escalatecnologia.com.br`). O valor de `TRAEFIK_CERT_RESOLVER` deve coincidir com o nome do resolver ACME no arquivo estático do Traefik (ex. `letsencrypt`).
 
@@ -76,7 +72,7 @@ No `.env`, defina `PANEL_HOST` (ex. `animallabor.escalatecnologia.com.br`). O va
 docker compose up -d --build
 ```
 
-Se o Traefik já redirecionar todo o `:80` para HTTPS, remova no `docker-compose.yml` as labels do router `panel-insecure` e o middleware `panel-https-redirect` (comentário no arquivo indica quais linhas).
+O compose só expõe o painel em **`websecure` (443)**. O redirecionamento **HTTP → HTTPS na porta 80** fica a cargo do Traefik (configuração global).
 
 ### Com Docker Compose sem Traefik (teste rápido)
 
@@ -98,7 +94,7 @@ docker run --rm -p 3000:3000 \
   secretaria-virtual-panel
 ```
 
-Em produção o repositório está preparado para **Traefik** na rede `traefik`. Outros proxies (Nginx, Caddy) também funcionam se apontarem para a porta **3000** do container.
+Em produção o repositório está preparado para **Traefik** na rede **`proxy-net`**. Outros proxies (Nginx, Caddy) também funcionam se apontarem para a porta **3000** do container.
 
 ### Atualizar o deploy
 
