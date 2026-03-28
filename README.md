@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Secretaria Virtual — Painel
 
-## Getting Started
+Painel administrativo em [Next.js](https://nextjs.org) (App Router) com Supabase.
 
-First, run the development server:
+## Requisitos
+
+- Node.js 20+ (desenvolvimento local)
+- Conta e projeto [Supabase](https://supabase.com) com SQL em `supabase/` aplicado conforme a documentação do projeto
+
+## Variáveis de ambiente
+
+Copie `.env.example` para `.env` e preencha (não commite `.env`).
+
+| Variável | Onde |
+|----------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser + servidor + **build Docker** |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser + servidor + **build Docker** |
+| `SUPABASE_SERVICE_ROLE_KEY` | Só servidor (API routes) |
+| `N8N_EMBEDDING_WEBHOOK_URL` | Opcional (há URL padrão no código) |
+
+No Supabase, configure **Site URL** e **Redirect URLs** de autenticação para o domínio real do painel em produção (incluindo `https://`).
+
+## Desenvolvimento
+
+Na pasta **`secretaria-virtual-panel`**:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Para limpar cache se a UI não atualizar ou houver erro de HMR:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev:clean
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+A URL costuma ser `http://localhost:3000` (ou outra porta se 3000 estiver ocupada).
 
-## Learn More
+### Produção local (`next start`)
 
-To learn more about Next.js, take a look at the following resources:
+`next start` só serve o último `npm run build`. Se o layout parecer antigo:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run start:fresh
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Diagnóstico
 
-## Deploy on Vercel
+- Página: **`/versao`**
+- API: **`/api/panel-version`** ou **`/api/debug/build`**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Docker (produção na VPS ou local)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+A imagem usa o [modo `standalone`](https://nextjs.org/docs/app/building-your-application/deploying#docker-image) do Next.js.
+
+### Pré-requisito
+
+Crie um `.env` na mesma pasta que o `docker-compose.yml` (pode copiar de `.env.example`). O Docker Compose lê esse arquivo para interpolar variáveis.
+
+**Importante:** `NEXT_PUBLIC_*` são incorporadas ao JavaScript no **momento do build**. Se mudar URL ou anon key do Supabase para o painel, é preciso **reconstruir** a imagem (`docker compose build --no-cache` ou `docker build ...` de novo).
+
+### Com Docker Compose
+
+```bash
+docker compose up -d --build
+```
+
+Porta no host: `3000` por padrão, ou defina `PANEL_PORT` no `.env`.
+
+### Só Docker (sem Compose)
+
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  -t secretaria-virtual-panel .
+
+docker run --rm -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  -e SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY" \
+  -e N8N_EMBEDDING_WEBHOOK_URL="$N8N_EMBEDDING_WEBHOOK_URL" \
+  secretaria-virtual-panel
+```
+
+Na VPS, coloque na frente um proxy reverso (Nginx, Caddy, Traefik) com TLS (Let’s Encrypt) e encaminhe para a porta do container.
+
+### Atualizar o deploy
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+## Git (só este repositório)
+
+Inicialize o Git **dentro** de `secretaria-virtual-panel` se este for o único app no repositório remoto.
+
+## Referências Next.js
+
+- [Documentação Next.js](https://nextjs.org/docs)
+- [Deploy com Docker](https://nextjs.org/docs/app/building-your-application/deploying#docker-image)

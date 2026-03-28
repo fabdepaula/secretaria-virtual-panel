@@ -1,0 +1,24 @@
+---
+description: O assistente executa comandos de terminal no projeto (não delega ao usuário).
+alwaysApply: true
+---
+
+# Responsabilidade por comandos de terminal
+
+- **Sempre que** for necessário rodar algo no terminal (`npm install`, `npm run dev`, `npm run build`, `rm -rf .next`, testes, lint, git, etc.), **o assistente deve executar os comandos** usando a ferramenta adequada — **não** limitar-se a instruir o usuário a copiar/colar no terminal.
+- Se um comando falhar (permissão, rede, timeout), tentar o ajuste necessário (permissões, caminho `secretaria-virtual-panel`) e informar o resultado de forma objetiva.
+- **Exceção:** comandos que exigem interação humana confidencial (login em serviços, confirmações destrutivas em produção) — aí explicar o que o usuário precisa fazer.
+- Preferir `npm run dev:clean` ou `rm -rf .next && npm run dev` quando houver sintomas de cache/chunks quebrados no Next.js.
+
+## Este repositório (`secretaria-virtual-panel`)
+
+- **Caminho:** comandos npm sempre a partir da pasta `secretaria-virtual-panel` (onde está o `package.json`).
+- **Após alterações de código** (`.ts`, `.tsx`, APIs, rotas): ao **concluir** a tarefa, rodar **`npm run build`** e corrigir erros se aparecerem — **não** pedir ao usuário para rodar o build.
+- **Servidor de desenvolvimento:** se for preciso validar no browser e não houver indicação de `dev` já rodando, o assistente pode subir **`npm run dev`** em background (ou confiar na tarefa automática do VS Code, ver abaixo).
+- **O usuário não deve depender** de abrir o terminal manualmente para build/dev por causa de mudanças feitas pelo assistente.
+
+## Tarefa automática no Cursor/VS Code
+
+- Existe `.vscode/tasks.json` com **Next.js: dev** configurado com `runOn: folderOpen`.
+- Na **primeira vez**, o editor pode pedir permissão para **“Allow Automatic Tasks in Folder”** — aceitar para o `dev` iniciar ao abrir a pasta do painel como workspace.
+- Se a porta 3000 já estiver em uso, parar o processo antigo ou ajustar a porta; não duplicar servidores sem necessidade.
