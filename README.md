@@ -62,6 +62,8 @@ Crie um `.env` na mesma pasta que o `docker-compose.yml` (pode copiar de `.env.e
 
 **Importante:** `NEXT_PUBLIC_*` são incorporadas ao JavaScript no **momento do build**. Se mudar URL ou anon key do Supabase para o painel, é preciso **reconstruir** a imagem (`docker compose build --no-cache` ou `docker build ...` de novo).
 
+`SUPABASE_SERVICE_ROLE_KEY` **não** precisa estar definida durante o `docker build`; basta no **runtime** (bloco `environment` do Compose / `.env` na VPS). O cliente admin só é criado quando uma rota a usa.
+
 ### Com Docker Compose + Traefik
 
 O `docker-compose.yml` **não publica a porta 3000** no host: o tráfego entra pelo Traefik (HTTPS). O painel usa a rede Docker **`proxy-net`** (a **mesma** rede à qual o container do Traefik está ligado). Se a rede ainda não existir: `docker network create proxy-net`.
