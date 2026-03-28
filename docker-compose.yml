@@ -20,7 +20,8 @@ services:
       - "traefik.http.routers.secretaria-animallabor.rule=Host(`${PANEL_HOST}`)"
       - traefik.http.routers.secretaria-animallabor.entrypoints=websecure
       - traefik.http.routers.secretaria-animallabor.tls=true
-      - traefik.http.routers.secretaria-animallabor.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      # Nome = chave em certificatesResolvers do Traefik (teu log: providerName=le.acme → use "le")
+      - traefik.http.routers.secretaria-animallabor.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-le}
       - traefik.http.routers.secretaria-animallabor.service=secretaria-animallabor
       - traefik.http.services.secretaria-animallabor.loadbalancer.server.port=3000
 

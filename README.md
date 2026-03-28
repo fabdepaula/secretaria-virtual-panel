@@ -18,7 +18,7 @@ Copie `.env.example` para `.env` e preencha (não commite `.env`).
 | `SUPABASE_SERVICE_ROLE_KEY` | Só servidor (API routes) |
 | `N8N_EMBEDDING_WEBHOOK_URL` | Opcional (há URL padrão no código) |
 | `PANEL_HOST` | Domínio do painel (labels Traefik), ex. `animallabor.escalatecnologia.com.br` |
-| `TRAEFIK_CERT_RESOLVER` | Opcional — nome do `certificatesResolvers` no Traefik (padrão: `letsencrypt`) |
+| `TRAEFIK_CERT_RESOLVER` | Opcional — nome do `certificatesResolvers` no Traefik (padrão no compose: `le`) |
 
 No Supabase, configure **Site URL** e **Redirect URLs** de autenticação para o domínio real do painel em produção (incluindo `https://`).
 
@@ -68,7 +68,7 @@ Crie um `.env` na mesma pasta que o `docker-compose.yml` (pode copiar de `.env.e
 
 O `docker-compose.yml` **não publica a porta 3000** no host: o tráfego entra pelo Traefik (HTTPS). O painel usa a rede Docker **`proxy-net`** (a **mesma** rede à qual o container do Traefik está ligado). Se a rede ainda não existir: `docker network create proxy-net`.
 
-No `.env`, defina `PANEL_HOST` (ex. `animallabor.escalatecnologia.com.br`). O valor de `TRAEFIK_CERT_RESOLVER` deve coincidir com o nome do resolver ACME no arquivo estático do Traefik (ex. `letsencrypt`).
+No `.env`, defina `PANEL_HOST` (ex. `animallabor.escalatecnologia.com.br`). O `TRAEFIK_CERT_RESOLVER` tem de ser **exactamente** o nome da chave em `certificatesResolvers` do Traefik (nos teus logs aparece `providerName=le.acme` → normalmente a chave é **`le`**). Se no `traefik.yml` estiver outro nome, define-o no `.env`.
 
 ```bash
 docker compose up -d --build
