@@ -1,5 +1,5 @@
 services:
-  panel:
+  secretaria-animallabor:
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,12 +17,12 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy-net
-      - "traefik.http.routers.panel.rule=Host(`${PANEL_HOST}`)"
-      - traefik.http.routers.panel.entrypoints=websecure
-      - traefik.http.routers.panel.tls=true
-      - traefik.http.routers.panel.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
-      - traefik.http.routers.panel.service=panel
-      - traefik.http.services.panel.loadbalancer.server.port=3000
+      - "traefik.http.routers.secretaria-animallabor.rule=Host(`${PANEL_HOST}`)"
+      - traefik.http.routers.secretaria-animallabor.entrypoints=websecure
+      - traefik.http.routers.secretaria-animallabor.tls=true
+      - traefik.http.routers.secretaria-animallabor.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      - traefik.http.routers.secretaria-animallabor.service=secretaria-animallabor
+      - traefik.http.services.secretaria-animallabor.loadbalancer.server.port=3000
 
 networks:
   proxy-net:

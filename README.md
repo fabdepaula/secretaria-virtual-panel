@@ -72,6 +72,8 @@ No `.env`, defina `PANEL_HOST` (ex. `animallabor.escalatecnologia.com.br`). O va
 docker compose up -d --build
 ```
 
+Serviço Compose: **`secretaria-animallabor`**. Logs: `docker compose logs -f secretaria-animallabor`.
+
 O compose só expõe o painel em **`websecure` (443)**. O redirecionamento **HTTP → HTTPS na porta 80** fica a cargo do Traefik (configuração global).
 
 ### Com Docker Compose sem Traefik (teste rápido)
