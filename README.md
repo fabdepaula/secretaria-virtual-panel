@@ -17,6 +17,8 @@ Copie `.env.example` para `.env` e preencha (não commite `.env`).
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser + servidor + **build Docker** |
 | `SUPABASE_SERVICE_ROLE_KEY` | Só servidor (API routes) |
 | `N8N_EMBEDDING_WEBHOOK_URL` | Opcional (há URL padrão no código) |
+| `PANEL_HOST` | Domínio do painel (labels Traefik), ex. `animallabor.escalatecnologia.com.br` |
+| `TRAEFIK_CERT_RESOLVER` | Opcional — nome do `certificatesResolvers` no Traefik (padrão: `letsencrypt`) |
 
 No Supabase, configure **Site URL** e **Redirect URLs** de autenticação para o domínio real do painel em produção (incluindo `https://`).
 
@@ -60,13 +62,25 @@ Crie um `.env` na mesma pasta que o `docker-compose.yml` (pode copiar de `.env.e
 
 **Importante:** `NEXT_PUBLIC_*` são incorporadas ao JavaScript no **momento do build**. Se mudar URL ou anon key do Supabase para o painel, é preciso **reconstruir** a imagem (`docker compose build --no-cache` ou `docker build ...` de novo).
 
-### Com Docker Compose
+### Com Docker Compose + Traefik
+
+O `docker-compose.yml` **não publica a porta 3000** no host: o tráfego entra pelo Traefik (HTTPS). A rede Docker **`traefik`** deve existir e ser a **mesma** à qual o container do Traefik está ligado.
+
+```bash
+docker network create traefik
+```
+
+No `.env`, defina `PANEL_HOST` (ex. `animallabor.escalatecnologia.com.br`). O valor de `TRAEFIK_CERT_RESOLVER` deve coincidir com o nome do resolver ACME no arquivo estático do Traefik (ex. `letsencrypt`).
 
 ```bash
 docker compose up -d --build
 ```
 
-Porta no host: `3000` por padrão, ou defina `PANEL_PORT` no `.env`.
+Se o Traefik já redirecionar todo o `:80` para HTTPS, remova no `docker-compose.yml` as labels do router `panel-insecure` e o middleware `panel-https-redirect` (comentário no arquivo indica quais linhas).
+
+### Com Docker Compose sem Traefik (teste rápido)
+
+Use `docker run` com `-p 3000:3000` (ver secção abaixo) ou um override local com `ports` — o compose padrão do repositório assume Traefik em produção.
 
 ### Só Docker (sem Compose)
 
@@ -84,7 +98,7 @@ docker run --rm -p 3000:3000 \
   secretaria-virtual-panel
 ```
 
-Na VPS, coloque na frente um proxy reverso (Nginx, Caddy, Traefik) com TLS (Let’s Encrypt) e encaminhe para a porta do container.
+Em produção o repositório está preparado para **Traefik** na rede `traefik`. Outros proxies (Nginx, Caddy) também funcionam se apontarem para a porta **3000** do container.
 
 ### Atualizar o deploy
 

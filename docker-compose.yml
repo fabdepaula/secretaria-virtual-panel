@@ -6,10 +6,30 @@ services:
       args:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-    ports:
-      - "${PANEL_PORT:-3000}:3000"
+    restart: unless-stopped
+    networks:
+      - traefik
     environment:
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       N8N_EMBEDDING_WEBHOOK_URL: ${N8N_EMBEDDING_WEBHOOK_URL:-}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - "traefik.http.routers.panel.rule=Host(`${PANEL_HOST}`)"
+      - traefik.http.routers.panel.entrypoints=websecure
+      - traefik.http.routers.panel.tls=true
+      - traefik.http.routers.panel.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      - traefik.http.routers.panel.service=panel
+      - traefik.http.services.panel.loadbalancer.server.port=3000
+      # HTTP → HTTPS (remova estas 5 linhas se o Traefik já redirecionar :80 globalmente)
+      - "traefik.http.routers.panel-insecure.rule=Host(`${PANEL_HOST}`)"
+      - traefik.http.routers.panel-insecure.entrypoints=web
+      - traefik.http.routers.panel-insecure.middlewares=panel-https-redirect
+      - traefik.http.middlewares.panel-https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.panel-https-redirect.redirectscheme.permanent=true
+
+networks:
+  traefik:
+    external: true
