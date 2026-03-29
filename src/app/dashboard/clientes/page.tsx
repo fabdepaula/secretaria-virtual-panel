@@ -377,8 +377,8 @@ export default function ClientesPage() {
       <div>
         <p className="text-sm text-blue-800/70">
           Cadastro PF/PJ com endereços e contatos vinculados (cargo).{" "}
-          <span className="font-medium text-blue-900">Duplo clique</span> na linha
-          para consultar; use <span className="font-medium">Habilitar edição</span> para
+          <span className="font-medium text-blue-900">Clique</span> na linha para
+          consultar; use <span className="font-medium">Habilitar edição</span> para
           alterar.
         </p>
       </div>
@@ -432,7 +432,7 @@ export default function ClientesPage() {
                             ? "bg-blue-100/70 ring-1 ring-inset ring-blue-200"
                             : "hover:bg-blue-50/60")
                         }
-                        onDoubleClick={() => void startEdit(c.id)}
+                        onClick={() => void startEdit(c.id)}
                       >
                         <td className="py-2 pr-3 font-medium text-blue-900">
                           {tipoClienteLabel(tipo)}

@@ -113,8 +113,8 @@ export default function ContatosPage() {
     <div className="flex flex-col gap-4">
       <div>
         <p className="text-sm text-blue-800/70">
-          <span className="font-medium text-blue-900">Duplo clique</span> na linha
-          para consultar. Use <span className="font-medium">Habilitar edição</span>{" "}
+          <span className="font-medium text-blue-900">Clique</span> na linha para
+          consultar. Use <span className="font-medium">Habilitar edição</span>{" "}
           para alterar.
         </p>
       </div>
@@ -160,7 +160,7 @@ export default function ContatosPage() {
                           ? "bg-blue-100/70 ring-1 ring-inset ring-blue-200"
                           : "hover:bg-blue-50/60")
                       }
-                      onDoubleClick={() => loadContatoFromRow(c)}
+                      onClick={() => loadContatoFromRow(c)}
                     >
                       <td className="py-2 pr-3 font-medium text-blue-900">
                         {c.nome}

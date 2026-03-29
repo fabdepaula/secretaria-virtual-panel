@@ -3,13 +3,13 @@
 import { Pencil, Trash2 } from "lucide-react";
 
 type Props = {
-  /** Omita ou use com `showEdit={false}` — duplo clique na linha abre consulta. */
+  /** Omita ou use com `showEdit={false}` — clique na linha abre consulta. */
   onEdit?: () => void;
   onDelete: () => void;
   disabled?: boolean;
   editLabel?: string;
   deleteLabel?: string;
-  /** default true. Se false, só o botão excluir (consulta via duplo clique na linha). */
+  /** default true. Se false, só o botão excluir (consulta via clique na linha). */
   showEdit?: boolean;
 };
 

@@ -422,8 +422,8 @@ export default function PlanosPage() {
     <div className="flex flex-col gap-4">
       <div>
         <p className="text-sm text-blue-800/70">
-          <span className="font-medium text-blue-900">Duplo clique</span> na linha
-          para selecionar o plano e gerenciar{" "}
+          <span className="font-medium text-blue-900">Clique</span> na linha para
+          selecionar o plano e gerenciar{" "}
           <span className="font-medium">serviços</span> e{" "}
           <span className="font-medium">clientes</span> no mesmo lugar. Use{" "}
           <span className="font-medium">Habilitar edição</span> para alterar os dados do
@@ -472,7 +472,7 @@ export default function PlanosPage() {
                           ? "bg-blue-100/70 ring-1 ring-inset ring-blue-200"
                           : "hover:bg-blue-50/60")
                       }
-                      onDoubleClick={() => loadPlanoFromRow(p)}
+                      onClick={() => loadPlanoFromRow(p)}
                     >
                       <td className="py-2 pr-3 font-medium text-blue-900">
                         {p.nome}
@@ -683,7 +683,7 @@ export default function PlanosPage() {
                                 ? "bg-blue-100/70 ring-1 ring-inset ring-blue-200"
                                 : "hover:bg-blue-50/60")
                             }
-                            onDoubleClick={() => loadPsFromRow(m)}
+                            onClick={() => loadPsFromRow(m)}
                           >
                             <td className="py-2 pr-3 font-medium text-blue-900">
                               {m.servico_nome}
@@ -932,7 +932,7 @@ export default function PlanosPage() {
             </>
           ) : (
             <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 px-4 py-6 text-sm text-blue-800/80">
-              Selecione um plano na lista (duplo clique) ou crie um plano acima para
+              Selecione um plano na lista (clique na linha) ou crie um plano acima para
               gerenciar serviços e clientes.
             </div>
           )}

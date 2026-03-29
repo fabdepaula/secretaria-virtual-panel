@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import TableIconActions from "@/app/dashboard/_components/TableIconActions";
 
 type ServicoBasic = {
@@ -73,14 +73,20 @@ function formatCurrencyValue(value: number | null): string {
 }
 
 export default function ServicosPage() {
-  const [loading, setLoading] = useState(false);
+  /** Evita aplicar resposta antiga se o utilizador mudar de linha rápido */
+  const detailRequestId = useRef(0);
+
+  const [loadingList, setLoadingList] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [servicos, setServicos] = useState<ServicoBasic[]>([]);
   const [form, setForm] = useState<ServicoForm>(emptyForm());
-  /** true = painel direito só leitura (carregado por duplo clique na linha) */
+  /** true = painel direito só leitura (carregado por clique na linha) */
   const [readOnly, setReadOnly] = useState(false);
 
-  const locked = loading || readOnly;
+  const listBusy = loadingList || loadingDetail || mutating;
+  const locked = readOnly || loadingDetail || mutating;
 
   useEffect(() => {
     void loadServicos();
@@ -88,7 +94,7 @@ export default function ServicosPage() {
   }, []);
 
   async function loadServicos() {
-    setLoading(true);
+    setLoadingList(true);
     setError(null);
     try {
       const res = await fetch("/api/servicos");
@@ -99,17 +105,20 @@ export default function ServicosPage() {
       const msg = e instanceof Error ? e.message : "Erro";
       setError(msg);
     } finally {
-      setLoading(false);
+      setLoadingList(false);
     }
   }
 
   async function loadServicoIntoPanel(id: string, options?: { edit?: boolean }) {
-    setLoading(true);
+    const reqId = ++detailRequestId.current;
+    setLoadingDetail(true);
     setError(null);
     try {
       const res = await fetch(`/api/servicos/${id}`);
       if (!res.ok) throw new Error("Falha ao carregar detalhes do serviço");
       const json = await res.json();
+      if (reqId !== detailRequestId.current) return;
+
       const d = json.data ?? {};
 
       setForm({
@@ -135,10 +144,11 @@ export default function ServicosPage() {
       });
       setReadOnly(!options?.edit);
     } catch (e) {
+      if (reqId !== detailRequestId.current) return;
       const msg = e instanceof Error ? e.message : "Erro";
       setError(msg);
     } finally {
-      setLoading(false);
+      if (reqId === detailRequestId.current) setLoadingDetail(false);
     }
   }
 
@@ -149,7 +159,7 @@ export default function ServicosPage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    setLoading(true);
+    setMutating(true);
     setError(null);
     try {
       if (!form.tipo.trim()) throw new Error("Tipo é obrigatório");
@@ -215,7 +225,7 @@ export default function ServicosPage() {
       const msg = e instanceof Error ? e.message : "Erro";
       setError(msg);
     } finally {
-      setLoading(false);
+      setMutating(false);
     }
   }
 
@@ -223,7 +233,7 @@ export default function ServicosPage() {
     const ok = window.confirm("Excluir serviço? Essa ação é irreversível.");
     if (!ok) return;
 
-    setLoading(true);
+    setMutating(true);
     setError(null);
     try {
       const res = await fetch(`/api/servicos/${id}`, { method: "DELETE" });
@@ -234,7 +244,7 @@ export default function ServicosPage() {
       const msg = e instanceof Error ? e.message : "Erro";
       setError(msg);
     } finally {
-      setLoading(false);
+      setMutating(false);
     }
   }
 
@@ -250,8 +260,8 @@ export default function ServicosPage() {
     <div className="flex flex-col gap-4">
       <div>
         <p className="text-sm text-blue-800/70">
-          <span className="font-medium text-blue-900">Duplo clique</span> na linha
-          para carregar o serviço à direita em modo consulta. Use{" "}
+          <span className="font-medium text-blue-900">Clique</span> na linha para
+          carregar o serviço à direita em modo consulta. Use{" "}
           <span className="font-medium">Habilitar edição</span> para alterar. Com{" "}
           <span className="font-medium">Agendamento</span> marcado, preencha também
           Agenda, Duração e Dados necessários.
@@ -269,7 +279,7 @@ export default function ServicosPage() {
           <div className="flex items-center justify-between gap-3">
             <div className="text-sm font-semibold text-blue-900">Lista</div>
             <div className="text-xs text-blue-800/70">
-              {loading ? "Atualizando..." : `${servicos.length} serviço(s)`}
+              {listBusy ? "Atualizando..." : `${servicos.length} serviço(s)`}
             </div>
           </div>
 
@@ -302,7 +312,7 @@ export default function ServicosPage() {
                           ? "bg-blue-100/70 ring-1 ring-inset ring-blue-200"
                           : "hover:bg-blue-50/60")
                       }
-                      onDoubleClick={() => void loadServicoIntoPanel(s.id)}
+                      onClick={() => void loadServicoIntoPanel(s.id)}
                     >
                       <td className="py-2 pr-3 font-medium text-blue-900">
                         {s.nome}
@@ -323,7 +333,7 @@ export default function ServicosPage() {
                         <TableIconActions
                           showEdit={false}
                           onDelete={() => onDelete(s.id)}
-                          disabled={loading}
+                          disabled={listBusy}
                         />
                       </td>
                     </tr>
@@ -349,7 +359,7 @@ export default function ServicosPage() {
                   type="button"
                   onClick={() => setReadOnly(false)}
                   className="text-xs font-semibold rounded-xl bg-blue-600 text-white px-3 py-2 hover:bg-blue-700 disabled:opacity-60"
-                  disabled={loading}
+                  disabled={listBusy}
                 >
                   Habilitar edição
                 </button>
@@ -363,7 +373,7 @@ export default function ServicosPage() {
                       : undefined
                   }
                   className="text-xs font-semibold text-blue-700 hover:bg-blue-50 rounded-xl border border-blue-100 px-3 py-2 disabled:opacity-60"
-                  disabled={loading}
+                  disabled={listBusy}
                 >
                   Cancelar edição
                 </button>
@@ -373,7 +383,7 @@ export default function ServicosPage() {
                   type="button"
                   onClick={() => clearPanel()}
                   className="text-xs font-semibold text-blue-700 hover:bg-blue-50 rounded-xl border border-blue-100 px-3 py-2 disabled:opacity-60"
-                  disabled={loading}
+                  disabled={listBusy}
                 >
                   Limpar
                 </button>
@@ -579,8 +589,9 @@ export default function ServicosPage() {
               <button
                 type="submit"
                 disabled={
-                  loading ||
-                  locked ||
+                  mutating ||
+                  readOnly ||
+                  loadingDetail ||
                   !form.tipo.trim() ||
                   !form.nome.trim() ||
                   !form.preparo.trim() ||
@@ -589,7 +600,7 @@ export default function ServicosPage() {
                 }
                 className="flex-1 h-11 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-60"
               >
-                {loading ? "Salvando..." : form.id ? "Salvar" : "Criar"}
+                {mutating ? "Salvando..." : form.id ? "Salvar" : "Criar"}
               </button>
             </div>
           </form>
