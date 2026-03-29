@@ -4,7 +4,12 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { formatCpf } from "@/lib/cpf";
 import DashboardPageTitle from "@/app/dashboard/_components/DashboardPageTitle";
 import DashboardAside from "@/app/dashboard/_components/DashboardAside";
+import { DashboardNavProvider } from "@/app/dashboard/_components/DashboardNavProvider";
 import { getPanelLogoUrl } from "@/lib/branding";
+import {
+  getDashboardNavVisibility,
+  type DashboardNavVisibility,
+} from "@/lib/dashboard-nav-visibility";
 
 /** Evita HTML do shell do painel ficar servido de cache (CDN / edge) com markup antigo. */
 export const dynamic = "force-dynamic";
@@ -56,43 +61,67 @@ export default async function DashboardLayout({
     // Não bloqueia o layout se falhar.
   }
 
-  return (
-    <div className="h-dvh overflow-hidden bg-[#F3F7FF] flex flex-col md:flex-row">
-      <DashboardAside
-        logoUrl={logoUrl}
-        usuarioNome={usuarioNome}
-        usuarioSub={usuarioSub}
-      />
+  let navVisibility: DashboardNavVisibility;
+  try {
+    navVisibility = await getDashboardNavVisibility(supabase);
+  } catch {
+    navVisibility = {
+      contatos: false,
+      clientes: false,
+      servicos: false,
+      planos: false,
+      usuarios: false,
+    };
+  }
 
-      <main className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden">
-        {/* Topo fixo: marca (mobile) + título da página */}
-        <header className="shrink-0 bg-[#023366] border-b border-[#0A427C] z-10">
-          <div className="w-full px-6 md:px-10 py-6 md:py-7 flex items-center gap-4 min-h-[5.5rem] md:min-h-[6rem]">
-            <div className="flex items-center gap-3 md:hidden shrink-0">
-              <div className="h-14 w-14 rounded-xl bg-white border border-white/20 flex items-center justify-center overflow-hidden">
+  return (
+    <DashboardNavProvider value={navVisibility}>
+      <div className="h-dvh overflow-hidden bg-[#F3F7FF] flex flex-col md:flex-row">
+        <DashboardAside
+          logoUrl={logoUrl}
+          usuarioNome={usuarioNome}
+          usuarioSub={usuarioSub}
+        />
+
+        <main className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden">
+          {/* Topo fixo: marca (mobile) + título da página */}
+          <header className="shrink-0 bg-[#023366] border-b border-[#0A427C] z-10">
+            <div className="w-full px-6 md:px-10 py-6 md:py-7 flex items-center gap-4 min-h-[5.5rem] md:min-h-[6rem]">
+              <div className="flex items-center gap-3 md:hidden shrink-0">
+                <div className="h-14 w-14 rounded-xl bg-white border border-white/20 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={logoUrl}
+                    alt=""
+                    className="h-14 w-14 object-contain"
+                  />
+                </div>
+                <div className="leading-tight">
+                  <div className="text-sm font-semibold text-white">Secretaria IA</div>
+                  <div className="text-xs text-white/75">Painel</div>
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <DashboardPageTitle />
+              </div>
+              <div className="shrink-0 ml-auto pl-2">
                 <img
-                  src={logoUrl}
-                  alt=""
-                  className="h-14 w-14 object-contain"
+                  src="/branding/escala-tecnologia-logo.png"
+                  alt="Escala Tecnologia"
+                  className="h-9 w-auto max-h-12 max-w-[min(220px,42vw)] md:h-11 md:max-h-14 object-contain object-right"
                 />
               </div>
-              <div className="leading-tight">
-                <div className="text-sm font-semibold text-white">Secretaria IA</div>
-                <div className="text-xs text-white/75">Painel</div>
-              </div>
             </div>
-            <DashboardPageTitle />
-          </div>
-        </header>
+          </header>
 
-        {/* Só esta área rola */}
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-5">
-            {children}
+          {/* Só esta área rola */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-5">
+              {children}
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </DashboardNavProvider>
   );
 }
 

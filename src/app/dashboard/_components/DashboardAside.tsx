@@ -13,14 +13,32 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import LogoutButton from "@/app/dashboard/_components/LogoutButton";
+import { useDashboardNavVisibility } from "@/app/dashboard/_components/DashboardNavProvider";
+import type { DashboardNavModule } from "@/lib/dashboard-nav-visibility";
 
-const NAV_ITEMS: { href: string; label: string; Icon: LucideIcon }[] = [
+const NAV_ITEMS: {
+  href: string;
+  label: string;
+  Icon: LucideIcon;
+  /** omitir = sempre visível (ex.: visão geral) */
+  module?: DashboardNavModule;
+}[] = [
   { href: "/dashboard", label: "Visão geral", Icon: LayoutDashboard },
-  { href: "/dashboard/contatos", label: "Contatos", Icon: Phone },
-  { href: "/dashboard/clientes", label: "Clientes", Icon: Users },
-  { href: "/dashboard/servicos", label: "Serviços", Icon: ClipboardList },
-  { href: "/dashboard/planos", label: "Planos", Icon: CreditCard },
-  { href: "/dashboard/usuarios", label: "Usuários", Icon: UserCog },
+  { href: "/dashboard/contatos", label: "Contatos", Icon: Phone, module: "contatos" },
+  { href: "/dashboard/clientes", label: "Clientes", Icon: Users, module: "clientes" },
+  {
+    href: "/dashboard/servicos",
+    label: "Serviços",
+    Icon: ClipboardList,
+    module: "servicos",
+  },
+  { href: "/dashboard/planos", label: "Planos", Icon: CreditCard, module: "planos" },
+  {
+    href: "/dashboard/usuarios",
+    label: "Usuários",
+    Icon: UserCog,
+    module: "usuarios",
+  },
 ];
 
 export default function DashboardAside({
@@ -33,6 +51,11 @@ export default function DashboardAside({
   usuarioSub: string;
 }) {
   const pathname = usePathname();
+  const navVisibility = useDashboardNavVisibility();
+
+  const visibleNavItems = NAV_ITEMS.filter(
+    (item) => !item.module || navVisibility[item.module]
+  );
 
   function isActive(href: string) {
     if (href === "/dashboard") return pathname === "/dashboard";
@@ -62,7 +85,7 @@ export default function DashboardAside({
 
       <nav className="flex-1 min-h-0 overflow-hidden px-3 py-2 flex flex-col justify-start">
         <div className="flex flex-col gap-1 shrink-0">
-          {NAV_ITEMS.map(({ href, label, Icon }) => {
+          {visibleNavItems.map(({ href, label, Icon }) => {
             const active = isActive(href);
             return (
               <Link
