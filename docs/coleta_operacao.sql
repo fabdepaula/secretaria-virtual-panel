@@ -1,0 +1,22 @@
+-- =====================================================================
+-- coleta_operacao.sql — ÍNDICE / LOG (o conteúdo foi dividido)
+--
+-- Este arquivo foi substituído por dois, nos nomes que o Cursor pediu para
+-- versionar em secretaria-virtual-panel/supabase/:
+--
+-- Conteúdo dividido e versionado em:
+--   supabase/coleta_panel_views.sql
+--   supabase/panel_permissions_coleta.sql
+--
+-- (cópia espelho também em docs/ para o pacote do Claude)
+--
+-- Migrações aplicadas no Supabase oocyvlhvuqpoyxdzimjv (LabVet Homol),
+-- em 26/09/2026, nesta ordem:
+--   1. operacao_views_v1           (4 views + grants)
+--   2. operacao_rbac_coleta_v1     (permissões coleta.* + policies de leitura)
+--   3. views_security_invoker_v1   (2 views antigas saíram de SECURITY DEFINER)
+--   4. coleta_rls_fecha_anon_v1    (remoção das anon_all_*, RLS do contador,
+--                                   FK traccar_geofences → ON DELETE RESTRICT)
+--
+-- Nada a executar aqui.
+-- =====================================================================

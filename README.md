@@ -17,6 +17,9 @@ Copie `.env.example` para `.env` e preencha (não commite `.env`).
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser + servidor + **build Docker** |
 | `SUPABASE_SERVICE_ROLE_KEY` | Só servidor (API routes) |
 | `N8N_EMBEDDING_WEBHOOK_URL` | Opcional (há URL padrão no código) |
+| `N8N_OPERADOR_ACAO_URL` | Runtime — webhook das ações do operador na coleta |
+| `N8N_OPERADOR_ACAO_TOKEN` | Runtime — valor do Header Auth do webhook (não vai ao browser) |
+| `N8N_OPERADOR_ACAO_HEADER` | Opcional — nome do header (padrão `Authorization`) |
 | `PANEL_HOST` | Domínio do painel (labels Traefik), ex. `animallabor.escalatecnologia.com.br` |
 | `TRAEFIK_CERT_RESOLVER` | Opcional — nome do `certificatesResolvers` no Traefik (padrão no compose: `le`) |
 
@@ -95,6 +98,8 @@ docker run --rm -p 3000:3000 \
   -e NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
   -e SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY" \
   -e N8N_EMBEDDING_WEBHOOK_URL="$N8N_EMBEDDING_WEBHOOK_URL" \
+  -e N8N_OPERADOR_ACAO_URL="$N8N_OPERADOR_ACAO_URL" \
+  -e N8N_OPERADOR_ACAO_TOKEN="$N8N_OPERADOR_ACAO_TOKEN" \
   secretaria-virtual-panel
 ```
 
@@ -110,6 +115,12 @@ docker compose up -d --build
 ## Git (só este repositório)
 
 Inicialize o Git **dentro** de `secretaria-virtual-panel` se este for o único app no repositório remoto.
+
+## Documentação funcional
+
+Visão de produto, arquitetura, banco, RBAC, módulos e APIs para o time:
+
+- [docs/DOCUMENTACAO_FUNCIONAL.md](./docs/DOCUMENTACAO_FUNCIONAL.md)
 
 ## Referências Next.js
 

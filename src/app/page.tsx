@@ -97,13 +97,13 @@ export default function Home() {
 
         <form className="mt-6 flex flex-col gap-4" onSubmit={onSubmit}>
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-foreground" htmlFor="login">
+            <label className="text-sm font-medium text-[#0B3D63]" htmlFor="login">
               Usuário ou e-mail
             </label>
             <input
               id="login"
               autoComplete="username"
-              className="h-11 rounded-xl border border-[#D7E7FF] px-3 text-foreground outline-none focus:ring-2 focus:ring-[#0B64C0]/30"
+              className="h-11 rounded-xl border border-[#D7E7FF] bg-white px-3 text-[#0B3D63] outline-none focus:ring-2 focus:ring-[#0B64C0]/30"
               placeholder="Login ou e-mail"
               value={login}
               onChange={(e) => {
@@ -114,14 +114,14 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-foreground" htmlFor="password">
+            <label className="text-sm font-medium text-[#0B3D63]" htmlFor="password">
               Senha
             </label>
             <input
               id="password"
               type="password"
               autoComplete="current-password"
-              className="h-11 rounded-xl border border-[#D7E7FF] px-3 text-foreground outline-none focus:ring-2 focus:ring-[#0B64C0]/30"
+              className="h-11 rounded-xl border border-[#D7E7FF] bg-white px-3 text-[#0B3D63] outline-none focus:ring-2 focus:ring-[#0B64C0]/30"
               placeholder="Digite sua senha"
               value={password}
               onChange={(e) => {

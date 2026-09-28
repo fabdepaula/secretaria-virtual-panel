@@ -6,6 +6,7 @@ import {
   ClipboardList,
   CreditCard,
   LayoutDashboard,
+  MapPinned,
   Phone,
   UserCog,
   UserRound,
@@ -33,6 +34,12 @@ const NAV_ITEMS: {
     module: "servicos",
   },
   { href: "/dashboard/planos", label: "Planos", Icon: CreditCard, module: "planos" },
+  {
+    href: "/dashboard/coleta",
+    label: "Operação coleta",
+    Icon: MapPinned,
+    module: "coleta",
+  },
   {
     href: "/dashboard/usuarios",
     label: "Usuários",

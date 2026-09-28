@@ -23,6 +23,7 @@ type ContatoVinculo = {
 };
 
 type EnderecoForm = {
+  id?: string;
   tipo_endereco: string;
   logradouro: string;
   numero: string;
@@ -217,6 +218,7 @@ export default function ClientesPage() {
         documentoDigits: d.cliente.documento ? onlyDigits(d.cliente.documento) : "",
         plano_id: d.cliente.plano_id ?? null,
         enderecos: (d.enderecos ?? []).map((e) => ({
+          id: e.id,
           tipo_endereco: e.tipo_endereco ?? "",
           logradouro: e.logradouro ?? "",
           numero: e.numero ?? "",
@@ -279,6 +281,7 @@ export default function ClientesPage() {
             );
           })
           .map((x) => ({
+            id: x.id || undefined,
             tipo_endereco: x.tipo_endereco.trim(),
             logradouro: x.logradouro.trim(),
             numero: x.numero.trim(),

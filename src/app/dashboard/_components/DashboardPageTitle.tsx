@@ -8,6 +8,7 @@ const TITLES: { prefix: string; title: string }[] = [
   { prefix: "/dashboard/clientes", title: "Clientes" },
   { prefix: "/dashboard/contatos", title: "Contatos" },
   { prefix: "/dashboard/planos", title: "Planos" },
+  { prefix: "/dashboard/coleta", title: "Operação da coleta" },
   { prefix: "/dashboard", title: "Visão geral" },
 ];
 

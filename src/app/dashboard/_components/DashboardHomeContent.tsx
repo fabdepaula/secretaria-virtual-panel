@@ -34,6 +34,12 @@ const CARDS: Array<{
     href: "/dashboard/planos",
     module: "planos",
   },
+  {
+    title: "Operação da coleta",
+    description: "Mapa ao vivo dos entregadores e fila com SLA.",
+    href: "/dashboard/coleta",
+    module: "coleta",
+  },
 ];
 
 export default function DashboardHomeContent() {

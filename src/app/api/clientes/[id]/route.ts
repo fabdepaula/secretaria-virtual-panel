@@ -5,6 +5,7 @@ import { onlyDigits, validateDocumento } from "@/lib/documento";
 import { ClienteTipoSchema } from "@/lib/cliente-tipo";
 
 const EnderecoSchema = z.object({
+  id: z.string().uuid().optional().nullable(),
   tipo_endereco: z.string().optional().default(""),
   logradouro: z.string().optional().default(""),
   numero: z.string().optional().default(""),
@@ -200,24 +201,26 @@ export async function PATCH(
     );
   }
 
-  // Endereços: recria para simplificar MVP
-  const { error: delEndErr } = await supabase
+  // Endereços: upsert por id (preserva FK de coletas/geofences e geo_*)
+  const { data: existentes, error: listEndErr } = await supabase
     .from("enderecos")
-    .delete()
+    .select("id")
     .eq("cliente_id", params.id);
-  if (delEndErr) {
+
+  if (listEndErr) {
     return NextResponse.json(
-      { message: "Erro ao remover endereços" },
+      { message: "Erro ao listar endereços" },
       { status: 500 }
     );
   }
 
+  const existentesIds = new Set((existentes ?? []).map((r) => r.id as string));
+  const keptIds = new Set<string>();
+
   for (const e of payload.enderecos ?? []) {
     const latitude = toNullableNumber(e.latitude);
     const longitude = toNullableNumber(e.longitude);
-
-    const { error: insErr } = await supabase.from("enderecos").insert({
-      cliente_id: params.id,
+    const row = {
       tipo_endereco: toNullableString(e.tipo_endereco),
       logradouro: toNullableString(e.logradouro),
       numero: toNullableString(e.numero),
@@ -228,11 +231,65 @@ export async function PATCH(
       cep: toNullableString(e.cep),
       latitude,
       longitude,
-    });
-    if (insErr) {
+    };
+
+    const incomingId =
+      typeof e.id === "string" && e.id.trim().length > 0 ? e.id.trim() : null;
+
+    if (incomingId && existentesIds.has(incomingId)) {
+      const { error: updErr } = await supabase
+        .from("enderecos")
+        .update(row)
+        .eq("id", incomingId)
+        .eq("cliente_id", params.id);
+      if (updErr) {
+        return NextResponse.json(
+          {
+            message: "Erro ao atualizar endereço",
+            details: String(updErr.message ?? updErr),
+          },
+          { status: 500 }
+        );
+      }
+      keptIds.add(incomingId);
+    } else {
+      const { error: insErr } = await supabase.from("enderecos").insert({
+        cliente_id: params.id,
+        ...row,
+      });
+      if (insErr) {
+        return NextResponse.json(
+          {
+            message: "Erro ao inserir endereço",
+            details: String(insErr.message ?? insErr),
+          },
+          { status: 500 }
+        );
+      }
+    }
+  }
+
+  const toDelete = Array.from(existentesIds).filter((id) => !keptIds.has(id));
+  for (const endId of toDelete) {
+    const { error: delOneErr } = await supabase
+      .from("enderecos")
+      .delete()
+      .eq("id", endId)
+      .eq("cliente_id", params.id);
+
+    if (delOneErr) {
+      const details = String(delOneErr.message ?? delOneErr);
+      const blocked =
+        /foreign key|violates foreign key|restrict/i.test(details) ||
+        delOneErr.code === "23503";
       return NextResponse.json(
-        { message: "Erro ao inserir endereço" },
-        { status: 500 }
+        {
+          message: blocked
+            ? "Não é possível remover este endereço: há coleta ou cerca (geofence) vinculada. Remova ou reassocie a coleta/cerca antes."
+            : "Erro ao remover endereço",
+          details,
+        },
+        { status: blocked ? 409 : 500 }
       );
     }
   }
@@ -298,9 +355,18 @@ export async function DELETE(
     .eq("cliente_id", params.id);
 
   if (delEndErr) {
+    const details = String(delEndErr.message ?? delEndErr);
+    const blocked =
+      /foreign key|violates foreign key|restrict/i.test(details) ||
+      delEndErr.code === "23503";
     return NextResponse.json(
-      { message: "Erro ao remover endereços" },
-      { status: 500 }
+      {
+        message: blocked
+          ? "Não é possível excluir o cliente: há endereço com coleta ou cerca (geofence) vinculada."
+          : "Erro ao remover endereços",
+        details,
+      },
+      { status: blocked ? 409 : 500 }
     );
   }
 

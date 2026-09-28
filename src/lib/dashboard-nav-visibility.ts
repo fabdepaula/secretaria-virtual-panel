@@ -5,6 +5,7 @@ export type DashboardNavModule =
   | "clientes"
   | "servicos"
   | "planos"
+  | "coleta"
   | "usuarios";
 
 export type DashboardNavVisibility = Record<DashboardNavModule, boolean>;
@@ -14,6 +15,7 @@ const MODULES: DashboardNavModule[] = [
   "clientes",
   "servicos",
   "planos",
+  "coleta",
   "usuarios",
 ];
 

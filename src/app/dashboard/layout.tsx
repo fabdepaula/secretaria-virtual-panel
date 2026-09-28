@@ -70,6 +70,7 @@ export default async function DashboardLayout({
       clientes: false,
       servicos: false,
       planos: false,
+      coleta: false,
       usuarios: false,
     };
   }
